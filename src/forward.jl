@@ -1,4 +1,4 @@
-include("GasCycle/GasCycle.jl")
+include("GasCycleModels/GasCycleModels.jl")
 include("ForcingModel/ForcingModel.jl")
 include("EnergyBalanceModel/EnergyBalanceModel.jl")
 include("Inputs/Inputs.jl")
