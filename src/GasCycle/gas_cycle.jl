@@ -3,28 +3,43 @@ include("load_csv.jl")
 
 struct GasCycleModel
     species::Vector{String}
-    a::Matrix{Real}
-    τ::Matrix{Real}
-    r0::Vector{Real}
-    ru::Vector{Real}
-    rT::Vector{Real}
-    ra::Vector{Real}
-    C₀::Vector{Real}
-    EtoC::Vector{Real}
-    f::Matrix{Real}
-    g₀::Vector{Real}
-    g₁::Vector{Real}
+    a::AbstractMatrix{<:Real}
+    τ::AbstractMatrix{<:Real}
+    r0::AbstractVector{<:Real}
+    ru::AbstractVector{<:Real}
+    rT::AbstractVector{<:Real}
+    ra::AbstractVector{<:Real}
+    C₀::AbstractVector{<:Real}
+    EtoC::AbstractVector{<:Real}
+    f::AbstractMatrix{<:Real}
+    g₀::AbstractVector{<:Real}
+    g₁::AbstractVector{<:Real}
 
     function GasCycleModel(species::Vector{String},
-                           a::Matrix{Real},
-                           τ::Matrix{Real},
-                           r0::Vector{Real},
-                           ru::Vector{Real},
-                           rT::Vector{Real},
-                           ra::Vector{Real},
-                           C₀::Vector{Real},
-                           EtoC::Vector{Real},
-                           f::Matrix{Real})
+                           a::AbstractMatrix{<:Real},
+                           τ::AbstractMatrix{<:Real},
+                           r0::AbstractVector{<:Real},
+                           ru::AbstractVector{<:Real},
+                           rT::AbstractVector{<:Real},
+                           ra::AbstractVector{<:Real},
+                           C₀::AbstractVector{<:Real},
+                           EtoC::AbstractVector{<:Real},
+                           f::AbstractMatrix{<:Real},
+                           g₀::AbstractVector{<:Real},
+                           g₁::AbstractVector{<:Real})
+            new(species, a, τ, r0, ru, rT, ra, C₀, EtoC, f, g₀, g₁)
+    end
+
+    function GasCycleModel(species::Vector{String},
+                           a::AbstractMatrix{<:Real},
+                           τ::AbstractMatrix{<:Real},
+                           r0::AbstractVector{<:Real},
+                           ru::AbstractVector{<:Real},
+                           rT::AbstractVector{<:Real},
+                           ra::AbstractVector{<:Real},
+                           C₀::AbstractVector{<:Real},
+                           EtoC::AbstractVector{<:Real},
+                           f::AbstractMatrix{<:Real})
             g₀, g₁ = compute_g(a, τ)
             new(species, a, τ, r0, ru, rT, ra, C₀, EtoC, f, g₀, g₁)
     end
@@ -40,7 +55,7 @@ end
 
 function compute_g(a, τ)
     δ = 100 ./ τ
-    e⁻ᵟ = exp(-δ)
+    e⁻ᵟ = exp.(-δ)
     g₁ = sum(a .* τ .* (1 .- (1 .+ δ) .* e⁻ᵟ), dims=2)
     g₀ = exp.(-sum(a .* τ .* (1 .- e⁻ᵟ), dims=2) ./ g₁)
     return vec(g₀), vec(g₁)
