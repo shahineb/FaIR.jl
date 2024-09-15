@@ -8,18 +8,21 @@ struct Emissions
     year::Vector{Real}
     species::Vector{String}
     units::Vector{String}
-    data::Matrix{Real}
+    values::Matrix{Real}
+    cumulative::Matrix{Real}
     index::NamedTuple
 
-    function Emissions(year::Vector{Real}, species::Vector{String}, units::Vector{String}, data::Matrix{Real})
+    function Emissions(year::Vector{Real}, species::Vector{String}, units::Vector{String}, values::Matrix{Real})
         index = NamedTuple{Tuple(Symbol.(species))}(1:length(species))
-        new(year, species, units, data, index)
+        cumulative = cumsum(values, dims=2)
+        new(year, species, units, values, cumulative, index)
     end
 
     function Emissions(path::String, species::Vector{String})
         emissions = load_csv_emission_data(path, species)
+        cumulative = cumsum(emissions.values, dims=2)
         index = NamedTuple{Tuple(Symbol.(species))}(1:length(species))
-        new(emissions.year, species, emissions.units, emissions.data, index)
+        new(emissions.year, species, emissions.units, emissions.values, cumulative, index)
     end
 end
 
