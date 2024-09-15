@@ -1,5 +1,7 @@
 using StaticArrays, LinearAlgebra, Random, Distributions
 
+include("load_csv.jl")
+
 struct EBM{Nbox}
     Nbox::Int
     C::SVector{Nbox, Real}  # Heat capacity of each box W m⁻² yr K⁻¹
@@ -12,8 +14,15 @@ struct EBM{Nbox}
     seed::Int               # Random seed for stochastic modelling
     Δt::Real                # Time step yr
     Nₜ::Int                  # Number of time steps
+
     function EBM(Nbox, C, κ, ε, F₄ₓ, ση, σξ, γ, seed, Δt, Nₜ)
         new{Nbox}(Nbox, C ./ Δt, κ, ε, F₄ₓ, ση, σξ, γ, seed, Δt, Nₜ)
+    end
+
+    function EBM(path::String, seed::Int, Δt::Real, Nₜ::Int)
+        params = load_ebm_params(path)
+        Nbox = length(params.C)
+        new{Nbox}(Nbox, params.C ./ Δt, params.κ, params.ε, params.F₄ₓ, params.ση, params.σξ, params.γ, seed, Δt, Nₜ)
     end
 end
 
@@ -47,6 +56,19 @@ function computeA(ebm::EBM)
         A[i + 1, i:i+2] = [Aᵢᵢ₋₁, Aᵢᵢ, Aᵢᵢ₊ᵢ]
     end
     return A
+end
+
+
+function compute_bd(ebm::EBM)
+    # Compute exp(A)
+    A = computeA(ebm)
+    eᴬ = exp(A)
+
+    # Compute vector forcing update bd = A⁻¹(eᴬ - I)b
+    b = zeros(ebm.Nbox + 1)
+    b[1] = ebm.γ
+    bd = A \ ((eᴬ - I) * b)
+    return bd
 end
 
 

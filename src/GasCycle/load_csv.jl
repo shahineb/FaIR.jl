@@ -12,6 +12,6 @@ function load_gascycle_params(path::String, species::Vector{String})
     ra = row.rA
     C₀ = row.PI_conc
     EtoC = row.emis2conc
-    output = (species=species, a=a, τ=τ, r0=r0, ru=ru, rT=rT, ra=ra, C₀=C₀, EtoC=EtoC, f=f)
+    output = (species=species, a=a, τ=τ, r0=r0, ru=ru, rT=rT, ra=ra, C₀=C₀, EtoC=EtoC)
     return output
 end

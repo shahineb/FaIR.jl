@@ -1,6 +1,6 @@
 module EnergyBalanceModel
 
-export EBM, FtoT, run
+export EBM, FtoT, run, computeA, compute_bd, samplevariability
 
 include("EBM.jl")
 

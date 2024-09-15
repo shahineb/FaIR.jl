@@ -11,7 +11,6 @@ struct GasCycleModel
     ra::AbstractVector{<:Real}
     C₀::AbstractVector{<:Real}
     EtoC::AbstractVector{<:Real}
-    f::AbstractMatrix{<:Real}
     g₀::AbstractVector{<:Real}
     g₁::AbstractVector{<:Real}
 
