@@ -16,10 +16,7 @@ gascycle = GasCycleModel("src/defaults/gas_parameters.csv", species)
 fm = Leach21("src/defaults/gas_parameters.csv", species)
 
 ebm = EBM("src/defaults/4xCO2_cummins_ebm3.csv", seed, Δt, Nₜ)
-A = computeA(ebm)
-eᴬ = exp(A)
-bd = compute_bd(ebm)
-wd = samplevariability(ebm)
+eᴬ, bd, wd = ebm_dynamics(ebm)
 
 
 

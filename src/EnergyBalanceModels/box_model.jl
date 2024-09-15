@@ -1,33 +1,46 @@
-using StaticArrays, LinearAlgebra, Random, Distributions
+using LinearAlgebra, Random, Distributions
 
 include("load_csv.jl")
 
-struct EBM{Nbox}
-    Nbox::Int
-    C::SVector{Nbox, Real}  # Heat capacity of each box W m⁻² yr K⁻¹
-    κ::SVector{Nbox, Real}  # Heat exchange coefficients W m⁻² K⁻¹
-    ε::Real                 # Deep ocean heat uptake efficacy
-    F₄ₓ::Real               # Effective RF for 4xCO₂
-    ση::Real                # Stddev of the white noise in the radiative forcing
-    σξ::Real                # Stddev of the white noise in the temperature
-    γ::Real                 # Autocorrelation parameter of stochastic forcing
-    seed::Int               # Random seed for stochastic modelling
-    Δt::Real                # Time step yr
-    Nₜ::Int                  # Number of time steps
+struct BoxModel
+    Nbox::Int                  # Number of boxes
+    C::AbstractVector{<:Real}  # Heat capacity of each box W m⁻² yr K⁻¹
+    κ::AbstractVector{<:Real}  # Heat exchange coefficients W m⁻² K⁻¹
+    ε::Real                    # Deep ocean heat uptake efficacy
+    F₄ₓ::Real                  # Effective RF for 4xCO₂
+    ση::Real                   # Stddev of the white noise in the radiative forcing
+    σξ::Real                   # Stddev of the white noise in the temperature
+    γ::Real                    # Autocorrelation parameter of stochastic forcing
+    seed::Int                  # Random seed for stochastic modelling
+    Δt::Real                   # Time step yr
+    Nₜ::Int                    # Number of time steps
 
-    function EBM(Nbox, C, κ, ε, F₄ₓ, ση, σξ, γ, seed, Δt, Nₜ)
-        new{Nbox}(Nbox, C ./ Δt, κ, ε, F₄ₓ, ση, σξ, γ, seed, Δt, Nₜ)
+    function BoxModel(C::AbstractVector{<:Real},
+                      κ::AbstractVector{<:Real},
+                      ε::Real,
+                      F₄ₓ::Real,
+                      ση::Real,
+                      σξ::Real,
+                      γ::Real,
+                      seed::Int,
+                      Δt::Real,
+                      Nₜ::Int)
+        Nbox = length(C)
+        new(Nbox, C ./ Δt, κ, ε, F₄ₓ, ση, σξ, γ, seed, Δt, Nₜ)
     end
 
-    function EBM(path::String, seed::Int, Δt::Real, Nₜ::Int)
+    function BoxModel(path::String,
+                      seed::Int,
+                      Δt::Real,
+                      Nₜ::Int)
         params = load_ebm_params(path)
         Nbox = length(params.C)
-        new{Nbox}(Nbox, params.C ./ Δt, params.κ, params.ε, params.F₄ₓ, params.ση, params.σξ, params.γ, seed, Δt, Nₜ)
+        new(Nbox, params.C ./ Δt, params.κ, params.ε, params.F₄ₓ, params.ση, params.σξ, params.γ, seed, Δt, Nₜ)
     end
 end
 
 
-function computeA(ebm::EBM)
+function computeA(ebm::BoxModel)
     # Instantiate matrix
     A = zeros(ebm.Nbox + 1, ebm.Nbox + 1)
     ε⁺ = ones(ebm.Nbox)
@@ -59,7 +72,7 @@ function computeA(ebm::EBM)
 end
 
 
-function compute_bd(ebm::EBM)
+function compute_bd(ebm::BoxModel)
     # Compute exp(A)
     A = computeA(ebm)
     eᴬ = exp(A)
@@ -72,7 +85,7 @@ function compute_bd(ebm::EBM)
 end
 
 
-function samplevariability(ebm::EBM)
+function samplevariability(ebm::BoxModel)
     A = computeA(ebm)
     Nₐ = size(A, 1)
     Q = zeros(Nₐ, Nₐ)
@@ -89,7 +102,7 @@ function samplevariability(ebm::EBM)
 end
 
 
-function impulseresponse(ebm::EBM)
+function impulseresponse(ebm::BoxModel)
     # Compute eigendecomposition of A
     A = computeA(ebm)
     Λ, Φ = eigen(A[2:end, 2:end])
@@ -101,12 +114,28 @@ function impulseresponse(ebm::EBM)
 end
 
 
-function emergentparameters(ebm::EBM, ratio₂ₓ₄ₓ=0.5)
+function emergentparameters(ebm::BoxModel, ratio₂ₓ₄ₓ=0.5)
     d, q = impulseresponse(ebm)
     τ₂ₓ = log(2) / log(1.01)
     ecs = ebm.F₄ₓ * ratio₂ₓ₄ₓ * sum(q)
     tcr = ebm.F₄ₓ * ratio₂ₓ₄ₓ * sum(q .* (1 .- (d ./ τ₂ₓ) .* (1 .- exp.(-τ₂ₓ ./ d))))
     return ecs, tcr
+end
+
+
+function ebm_dynamics(ebm::BoxModel)
+    # Compute exp(A)
+    A = computeA(ebm)
+    eᴬ = exp(A)
+
+    # Compute vector forcing update bd = A⁻¹(eᴬ - I)b
+    b = zeros(ebm.Nbox + 1)
+    b[1] = ebm.γ
+    bd = A \ ((eᴬ - I) * b)
+
+    # Sample internal variability updates
+    wd = samplevariability(ebm)
+    return eᴬ, bd, wd
 end
 
 
@@ -116,7 +145,7 @@ function FtoT(Tₜ₋₁, eᴬ, bd, wdₜ₋₁, RFₜ₋₁)
 end
 
 
-function run(ebm::EBM, RF::Vector{<:Real})
+function run(ebm::BoxModel, RF::AbstractVector{<:Real})
     # Compute exp(A)
     A = computeA(ebm)
     eᴬ = exp(A)

@@ -1,8 +1,8 @@
 module fair
 
-export GasCycle
-export ForcingModel
-export EnergyBalanceModel
+export GasCycleModels
+export ForcingModels
+export EnergyBalanceModels
 
 include("forward.jl")
 
