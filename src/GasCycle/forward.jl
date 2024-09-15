@@ -23,18 +23,18 @@ end
 E = Emissions("src/defaults/historical-emissions.csv", ["CO2", "CH4", "SO2", "BC"])
 gascycle = GasCycleModel("src/defaults/gas_parameters.csv", ["CO2", "CH4", "SO2", "BC"])
 
-n_pool = 4
-t = 1
-Eₜ = E.values[:, t]
-pool_partition = zeros(Real, 4, n_pool)
-airborneₜ = zeros(Real, 4)
-cumulativeₜ = E.cumulative[:, t]
-Tₜ = 0.
-iirfmax = 100.
-αₜ = α(gascycle, airborneₜ, cumulativeₜ, Tₜ, iirfmax)
+# n_pool = 4
+# t = 1
+# Eₜ = E.values[:, t]
+# pool_partition = zeros(Real, 4, n_pool)
+# airborneₜ = zeros(Real, 4)
+# cumulativeₜ = E.cumulative[:, t]
+# Tₜ = 0.
+# iirfmax = 100.
+# αₜ = α(gascycle, airborneₜ, cumulativeₜ, Tₜ, iirfmax)
 
 
 
-E₀ = E.values[:, 1]
-Δt = 1.
-Cₜ, Burdenₜ = EtoC(gascycle, Eₜ, pool_partition, αₜ, E₀, Δt)
+# E₀ = E.values[:, 1]
+# Δt = 1.
+# Cₜ, Burdenₜ = EtoC(gascycle, Eₜ, pool_partition, αₜ, E₀, Δt)
