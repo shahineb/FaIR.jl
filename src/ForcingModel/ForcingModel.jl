@@ -1,6 +1,6 @@
 module ForcingModel
 
-export leach2021ghg
+export Leach21, CtoF
 
 include("ghg.jl")
 

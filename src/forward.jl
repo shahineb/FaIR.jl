@@ -20,15 +20,17 @@ airborneₜ = zeros(Real, n_species)
 Tₜ = 1.
 αs = zeros(Real, size(E.values))
 C = zeros(Real, size(E.values))
+F = zeros(Real, size(E.values))
 for t in 1:length(E.year)
     αs[:, t] = α(gascycle, airborneₜ, E.cumulative[:, t], Tₜ, iirfmax)
     C[:, t], pool_partition = EtoC(gascycle, E.values[:, t], pool_partition, αs[:, t], E₀, Δt)
+    # F[:, t] = NaN
 end
 
 
 using GLMakie
 fig = Figure()
-units = ['ppm', 'ppb']
+units = ["ppm", "ppb"]
 for i in 1:n_species
     ax = Axis(fig[1, i]; xlabel = "Year", ylabel = units[i],
               title = species[i])
@@ -41,6 +43,3 @@ for i in 1:n_species
 end
 display(fig)
 GLMakie.closeall()
-# Cₜ, Burdenₜ = EtoC(gascycle, Eₜ, Burdenₜ₋₁, αₜ, E₀, Δt)
-# C
-# αₜ
