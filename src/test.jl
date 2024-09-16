@@ -1,11 +1,4 @@
-# include("EnergyBalanceModels/EnergyBalanceModels.jl")
+include("FaIR.jl")
 
-# using .EnergyBalanceModels
+using .FaIR
 
-# BoxModel
-
-include("fair.jl")
-
-using .fair
-
-BoxModel
