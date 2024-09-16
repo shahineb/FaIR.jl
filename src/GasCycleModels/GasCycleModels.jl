@@ -1,7 +1,8 @@
 module GasCycleModels
 
-export ReservoirModel, EtoC, α
+export ReservoirModel, EtoC, α, αᶜᴴ⁴
 
-include("forward.jl")
+include("reservoir_model.jl")
+include("calculate_alpha.jl")
 
 end

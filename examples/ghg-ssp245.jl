@@ -1,4 +1,4 @@
-include("src/FaIR.jl")
+include("../src/FaIR.jl")
 
 using GLMakie
 using .FaIR
