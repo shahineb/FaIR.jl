@@ -1,7 +1,5 @@
 using LinearAlgebra, Random, Distributions
 
-include("load_csv.jl")
-include("constants.jl")
 
 struct BoxModel
     Nbox::Int                  # Number of boxes

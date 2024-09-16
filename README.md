@@ -2,6 +2,7 @@
 
 
 [x] Clean up ebm (make the forward methods compact like for the other modules)
+[ ] Change dirty constructors to clean constructing functions
 [ ] Implement more sophisticated forcing function that allows to load the actual file
 [ ] Make it possible to load multiple configs (not too hard, only applies to ebm)
 [ ] Methane lifetime update -> might mean I need to think of a way to distinguish species in alpha

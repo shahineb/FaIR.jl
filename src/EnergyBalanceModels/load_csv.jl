@@ -1,6 +1,6 @@
 using CSV, DataFrames
 
-function load_box_model_params(path::String)
+function load_box_model_params(path)
     df = CSV.read(path, DataFrame)
     row = filter(row -> row.model == "CAMS-CSM1-0", df)
     γ = row.gamma[1]
