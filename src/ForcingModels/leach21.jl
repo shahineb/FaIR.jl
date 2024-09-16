@@ -33,9 +33,3 @@ function CtoF(fm::Leach21, C::AbstractVector{<:Real}, scaling::Real, idxCO₂::I
     F[idxN₂O] = scaling .* fm.f₃ᴺ²ᴼ .* (.√C_N₂O .- .√C₀_N₂O)
     return F
 end
-
-
-# species = ["CO2", "CH4", "N2O"]
-# fm = Leach21("src/defaults/gas_parameters.csv", species)
-# C = 1800 .* ones(3, 50)
-# F = CtoF(fm, C, 1., 1, 2, 3)
