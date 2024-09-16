@@ -33,7 +33,7 @@ struct BoxModel
                       seed::Int,
                       Δt::Real,
                       Nₜ::Int)
-        params = load_ebm_params(path)
+        params = load_box_model_params(path)
         Nbox = length(params.C)
         new(Nbox, params.C ./ Δt, params.κ, params.ε, params.F₄ₓ, params.ση, params.σξ, params.γ, seed, Δt, Nₜ)
     end

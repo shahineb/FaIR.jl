@@ -1,9 +1,9 @@
 module FaIR
 
 export Emissions
-export ReservoirModel
-export Leach21
-export BoxModel
+export ReservoirModel, EtoC, α
+export Leach21, CtoF
+export BoxModel, ebm_dynamics, FtoT, run
 
 
 include("Inputs/Inputs.jl")

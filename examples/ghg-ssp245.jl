@@ -1,45 +1,50 @@
-include("GasCycleModels/GasCycleModels.jl")
-include("ForcingModel/ForcingModel.jl")
-include("EnergyBalanceModel/EnergyBalanceModel.jl")
-include("Inputs/Inputs.jl")
+include("src/FaIR.jl")
 
-using .GasCycle, .ForcingModel, .EnergyBalanceModel, .Inputs
+using GLMakie
+using .FaIR
 
+# Path to parameter files
+emission_csv = "src/defaults/ssp245-emissions.csv"
+species_csv = "src/defaults/gas_parameters.csv"
+ebm_csv = "src/defaults/4xCO2_cummins_ebm3.csv"
+
+# Define emissions
 species = ["CO2", "CH4", "N2O"]
-E = Emissions("src/defaults/ssp245-emissions.csv", species)
+E = Emissions(emission_csv, species)
 
-Nₜ = length(E.year)
-Δt = 1.
+# Define gas cycle model
+gas_model = ReservoirModel(species_csv, species)
+
+# Define forcing model
+forcing_model = Leach21(species_csv, species)
+
+# Define energy balance model
 seed = 2
-
-gascycle = GasCycleModel("src/defaults/gas_parameters.csv", species)
-fm = Leach21("src/defaults/gas_parameters.csv", species)
-
-ebm = EBM("src/defaults/4xCO2_cummins_ebm3.csv", seed, Δt, Nₜ)
+Δt = 1.
+Nₜ = length(E.year)
+ebm = BoxModel(ebm_csv, seed, Δt, Nₜ)
 eᴬ, bd, wd = ebm_dynamics(ebm)
 
 
-
+# Run model
 n_species = length(species)
 n_pool = 4
 pool_partition = zeros(Real, n_species, n_pool)
-# E₀ = [0., 0., 2.44004844, 2.09777075]
 E₀ = [0., 0., 0.]
 iirfmax = 100.
 airborneₜ = zeros(Real, n_species)
 αs = zeros(Real, size(E.values))
 C = zeros(Real, size(E.values))
+C[:, 1] = gas_model.C₀
 F = zeros(Real, size(E.values))
 T = zeros(Real, ebm.Nₜ, ebm.Nbox + 1)
 for t in 2:Nₜ
-    αs[:, t - 1] = α(gascycle, airborneₜ, E.cumulative[:, t - 1], T[t - 1, 2], iirfmax)
-    C[:, t], pool_partition = EtoC(gascycle, E.values[:, t - 1], pool_partition, αs[:, t - 1], E₀, Δt)
-    F[:, t] = CtoF(fm, C[:, t], 1., E.index.CO2, E.index.CH4, E.index.N2O)
+    αs[:, t - 1] = α(gas_model, airborneₜ, E.cumulative[:, t - 1], T[t - 1, 2], iirfmax)
+    C[:, t], pool_partition = EtoC(gas_model, E.values[:, t - 1], pool_partition, αs[:, t - 1], E₀, Δt)
+    F[:, t] = CtoF(forcing_model, C[:, t], 1., E.index.CO2, E.index.CH4, E.index.N2O)
     T[t, :] = FtoT(T[t - 1, :], eᴬ, bd, wd[t - 1, :], sum(F[:, t]))
 end
 
-
-using GLMakie
 
 # Concentrations plot
 fig = Figure()
@@ -54,6 +59,7 @@ for i in 1:n_species
     axislegend(ax, position=:rb)
 end
 display(fig)
+
 
 # Forcing plot
 fig = Figure()
