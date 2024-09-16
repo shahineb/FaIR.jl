@@ -1,5 +1,3 @@
-include("reservoir_model.jl")
-
 
 function α(gcm::ReservoirModel, airborneₜ::AbstractVector{<:Real}, cumulativeₜ::AbstractVector{<:Real}, Tₜ::Real, iirfmax::Real)
     iirf = gcm.r0 .+ gcm.ru .* (cumulativeₜ .- airborneₜ) .+ gcm.rT .* Tₜ .+ gcm.ra .* airborneₜ

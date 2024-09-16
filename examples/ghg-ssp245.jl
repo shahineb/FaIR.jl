@@ -1,7 +1,5 @@
-include("../src/FaIR.jl")
-
+using FaIR
 using GLMakie
-using .FaIR
 
 # Path to parameter files
 emission_csv = "src/defaults/ssp245-emissions.csv"
