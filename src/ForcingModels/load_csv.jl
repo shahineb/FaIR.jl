@@ -13,6 +13,7 @@ end
 
 function load_meinshausen20_params(path, species)
     speciesdf = CSV.read(path, DataFrame)
+    species = lowercase.(species)
     row = filter(row -> lowercase.(row.name) ∈ species, speciesdf)
     scaling = row.forcing_scale
     C₀ = row.forcing_reference_concentration

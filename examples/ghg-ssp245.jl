@@ -14,7 +14,7 @@ E = Emissions(emission_csv, species)
 gas_model = ReservoirModel(species_csv, species)
 
 # Define forcing model
-forcing_model = Leach21(species_csv, species)
+forcing_model = Meinshausen2020("src/defaults/species_configs_properties.csv", species)
 
 # Define energy balance model
 seed = 2
@@ -22,7 +22,6 @@ seed = 2
 Nₜ = length(E.year)
 ebm = BoxModel(ebm_csv, seed, Δt, Nₜ)
 eᴬ, bd, wd = ebm_dynamics(ebm)
-
 
 # Run model
 n_species = length(species)
@@ -39,7 +38,7 @@ T = zeros(Real, ebm.Nₜ, ebm.Nbox + 1)
 for t in 2:Nₜ
     αs[:, t - 1] = α(gas_model, airborneₜ, E.cumulative[:, t - 1], T[t - 1, 2], iirfmax)
     C[:, t], pool_partition = EtoC(gas_model, E.values[:, t - 1], pool_partition, αs[:, t - 1], E₀, Δt)
-    F[:, t] = CtoF(forcing_model, C[:, t], 1., E.index.CO2, E.index.CH4, E.index.N2O)
+    F[:, t] = CtoF(forcing_model, C[:, t], E.index.CO2, E.index.CH4, E.index.N2O)
     T[t, :] = FtoT(T[t - 1, :], eᴬ, bd, wd[t - 1, :], sum(F[:, t]))
 end
 

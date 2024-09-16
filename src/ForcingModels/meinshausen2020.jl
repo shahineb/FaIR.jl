@@ -17,7 +17,7 @@ end
 
 
 function Meinshausen2020(C₀::AbstractVector{<:Real}, scaling::AbstractVector{<:Real}, ghg_radiative_efficiency::AbstractVector{<:Real})
-    Meinshausen2020(-2.4785e-07, 0.00075906, -0.0021492, 5.2488, -0.00034197, 0.00025455, -0.00024357, 0.12173, -8.9603e-05, -0.00012462, 0.045194, C₀, scaling, ghg_radiative_efficiency)
+    return Meinshausen2020(-2.4785e-07, 0.00075906, -0.0021492, 5.2488, -0.00034197, 0.00025455, -0.00024357, 0.12173, -8.9603e-05, -0.00012462, 0.045194, C₀, scaling, ghg_radiative_efficiency)
 end 
 
 
@@ -55,8 +55,3 @@ function CtoF(fm::Meinshausen2020, C, idxCO₂, idxCH₄, idxN₂O)
     F[idxN₂O] = fm.scaling[idxN₂O] * (fm.a₂ * √C_CO₂ + fm.b₂ * √C_N₂O + fm.c₂ * √C_CH₄ + fm.d₂) * (√C_N₂O - √C₀_N₂O)
     return F
 end
-
-
-# path = "src/defaults/species_configs_properties.csv"
-# species = ["CO2", "CH4", "N2O"]
-# fm = Meinshausen2020(path, species)
