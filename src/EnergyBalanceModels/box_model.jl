@@ -1,6 +1,7 @@
 using LinearAlgebra, Random, Distributions
 
 include("load_csv.jl")
+include("constants.jl")
 
 struct BoxModel
     Nbox::Int                  # Number of boxes
@@ -116,7 +117,7 @@ end
 
 function emergentparameters(ebm::BoxModel, ratio₂ₓ₄ₓ=0.5)
     d, q = impulseresponse(ebm)
-    τ₂ₓ = log(2) / log(1.01)
+    τ₂ₓ = DOUBLING_TIME_1PCT
     ecs = ebm.F₄ₓ * ratio₂ₓ₄ₓ * sum(q)
     tcr = ebm.F₄ₓ * ratio₂ₓ₄ₓ * sum(q .* (1 .- (d ./ τ₂ₓ) .* (1 .- exp.(-τ₂ₓ ./ d))))
     return ecs, tcr
