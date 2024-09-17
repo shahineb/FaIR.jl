@@ -3,7 +3,7 @@ using GLMakie
 
 # Path to parameter files
 emission_csv = "src/defaults/ssp245-emissions.csv"
-species_csv = "src/defaults/gas_parameters.csv"
+species_csv = "src/defaults/species_configs_properties.csv"
 ebm_csv = "src/defaults/4xCO2_cummins_ebm3.csv"
 
 # Define emissions
@@ -14,7 +14,7 @@ E = Emissions(emission_csv, species)
 gas_model = ReservoirModel(species_csv, species)
 
 # Define forcing model
-forcing_model = Meinshausen2020("src/defaults/species_configs_properties.csv", species)
+forcing_model = Meinshausen2020(species_csv, species)
 
 # Define energy balance model
 seed = 2
