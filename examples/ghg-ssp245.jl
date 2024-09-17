@@ -7,14 +7,14 @@ species_csv = "src/defaults/species_configs_properties.csv"
 ebm_csv = "src/defaults/4xCO2_cummins_ebm3.csv"
 
 # Define emissions
-species = ["CO2", "CH4", "N2O"]
+species = ["CO2", "CH4", "N2O", "SO2"]
 E = Emissions(emission_csv, species)
 
 # Define gas cycle model
 gas_model = ReservoirModel(species_csv, species)
 
-# Define forcing model
-forcing_model = Meinshausen2020(species_csv, species)
+# Define forcing models
+ghg_forcing_model = Meinshausen2020(species_csv, ["CO2", "CH4", "N2O"])
 
 # Define energy balance model
 seed = 2
@@ -27,7 +27,7 @@ eᴬ, bd, wd = ebm_dynamics(ebm)
 n_species = length(species)
 n_pool = 4
 pool_partition = zeros(Real, n_species, n_pool)
-E₀ = [0., 0., 0.]
+E₀ = [0., 0., 0., 0.]
 iirfmax = 100.
 airborneₜ = zeros(Real, n_species)
 αs = zeros(Real, size(E.values))
@@ -38,7 +38,7 @@ T = zeros(Real, ebm.Nₜ, ebm.Nbox + 1)
 for t in 2:Nₜ
     αs[:, t - 1] = α(gas_model, airborneₜ, E.cumulative[:, t - 1], T[t - 1, 2], iirfmax)
     C[:, t], pool_partition = EtoC(gas_model, E.values[:, t - 1], pool_partition, αs[:, t - 1], E₀, Δt)
-    F[:, t] = CtoF(forcing_model, C[:, t], E.index.CO2, E.index.CH4, E.index.N2O)
+    F[:, t] = compute_ghg_forcing(ghg_forcing_model, C[:, t], E.index.CO2, E.index.CH4, E.index.N2O)
     T[t, :] = FtoT(T[t - 1, :], eᴬ, bd, wd[t - 1, :], sum(F[:, t]))
 end
 
