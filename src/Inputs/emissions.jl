@@ -8,9 +8,9 @@ struct Emissions
 end
 
 
-function Emissions(path::String, species::Vector{String})
+function Emissions(path, species)
     emissions = load_csv_emission_data(path, species)
     cumulative = cumsum(emissions.values, dims=2)
     index = NamedTuple{Tuple(Symbol.(species))}(1:length(species))
-    Emissions(emissions.year, species, emissions.units, emissions.values, cumulative, index)
+    return Emissions(emissions.year, species, emissions.units, emissions.values, cumulative, index)
 end
