@@ -14,7 +14,7 @@ E = Emissions(emission_csv, species)
 gas_model = ReservoirModel(species_csv, species)
 
 # Define forcing models
-ghg_forcing_model = Meinshausen2020(species_csv, ["CO2", "CH4", "N2O"])
+CO₂_CH₄_N₂O_forcing_model = Meinshausen2020(species_csv, ["CO2", "CH4", "N2O"])
 
 # Define energy balance model
 seed = 2

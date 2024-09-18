@@ -27,7 +27,7 @@ function Meinshausen2020(path::String, species::Vector{String})
 end
 
 
-function compute_ghg_forcing(fm::Meinshausen2020, C, idxCO₂, idxCH₄, idxN₂O)
+function compute_CO₂_CH₄_N₂O_forcing(fm::Meinshausen2020, C, idxCO₂, idxCH₄, idxN₂O)
     C_CO₂ = C[idxCO₂]
     C_CH₄ = C[idxCH₄]
     C_N₂O = C[idxN₂O]

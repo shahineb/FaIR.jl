@@ -12,10 +12,10 @@ function Leach21(path::String, species::Vector{String})
     params = load_leach21_params(path, species)
     index = NamedTuple{Tuple(Symbol.(species))}(1:length(species))
     scaling = ones(length(species))
-    Leach21(params.f[index.CO2, 1], params.f[index.CO2, 3], params.f[index.CH4, 3], params.f[index.N2O, 3], params.C₀, scaling)
+    return Leach21(params.f[index.CO2, 1], params.f[index.CO2, 3], params.f[index.CH4, 3], params.f[index.N2O, 3], params.C₀, scaling)
 end
 
-function compute_ghg_forcing(fm::Leach21, C, idxCO₂, idxCH₄, idxN₂O)
+function compute_CO₂_CH₄_N₂O_forcing(fm::Leach21, C, idxCO₂, idxCH₄, idxN₂O)
     C_CO₂ = C[idxCO₂]
     C_CH₄ = C[idxCH₄]
     C_N₂O = C[idxN₂O]

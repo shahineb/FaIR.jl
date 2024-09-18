@@ -1,13 +1,12 @@
 module ForcingModels
 
-export Meinshausen2020, Leach21, compute_ghg_forcing
-export compute_linear_forcing
-export compute_aci_forcing
+export Meinshausen2020, Leach21, compute_CO₂_CH₄_N₂O_forcing
+export GHGForcing, compute_linear_forcing
 
-include("GHGForcingModels/GHGForcingModels.jl")
-using .GHGForcingModels
+include("RequiredForcingModels/RequiredForcingModels.jl")
+using .RequiredForcingModels
 
-include("linear_forcing.jl")
-include("aerosol_forcing/aci_forcing.jl")
+include("OptionalForcingModels/OptionalForcingModels.jl")
+using .OptionalForcingModels
 
 end
