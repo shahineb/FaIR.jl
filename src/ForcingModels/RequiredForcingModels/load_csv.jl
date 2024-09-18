@@ -17,7 +17,7 @@ function load_meinshausen20_params(path, species)
     row = filter(row -> lowercase.(row.name) ∈ species, speciesdf)
     scaling = row.forcing_scale
     C₀ = row.forcing_reference_concentration
-    ghg_radiative_efficiency = row.greenhouse_gas_radiative_efficiency
-    output = (scaling=scaling, C₀=C₀, ghg_radiative_efficiency=ghg_radiative_efficiency)
+    radiative_efficiency = row.greenhouse_gas_radiative_efficiency
+    output = (scaling=scaling, C₀=C₀, radiative_efficiency=radiative_efficiency)
     return output
 end

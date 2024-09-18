@@ -1,7 +1,7 @@
 module OptionalForcingModels
 
 export LinearForcing,
-       GHGForcing,
+       MinorGHGForcing,
        ContrailsForcing,
        LAPSIForcing,
        StratosphericVapourForcing,
@@ -10,6 +10,5 @@ export LinearForcing,
 
 include("load_csv.jl")
 include("linear_forcing.jl")
-
 
 end

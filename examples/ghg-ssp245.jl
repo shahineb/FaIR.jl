@@ -38,7 +38,7 @@ T = zeros(Real, ebm.Nₜ, ebm.Nbox + 1)
 for t in 2:Nₜ
     αs[:, t - 1] = α(gas_model, airborneₜ, E.cumulative[:, t - 1], T[t - 1, 2], iirfmax)
     C[:, t], pool_partition = EtoC(gas_model, E.values[:, t - 1], pool_partition, αs[:, t - 1], E₀, Δt)
-    F[:, t] = compute_ghg_forcing(ghg_forcing_model, C[:, t], E.index.CO2, E.index.CH4, E.index.N2O)
+    F[:, t] = compute_CO₂_CH₄_N₂O_forcing(ghg_forcing_model, C[:, t], E.index.CO2, E.index.CH4, E.index.N2O)
     T[t, :] = FtoT(T[t - 1, :], eᴬ, bd, wd[t - 1, :], sum(F[:, t]))
 end
 

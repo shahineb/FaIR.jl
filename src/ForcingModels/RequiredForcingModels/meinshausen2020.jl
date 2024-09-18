@@ -12,18 +12,18 @@ struct Meinshausen2020
     d₃::Real
     C₀::AbstractVector{<:Real}
     scaling::AbstractVector{<:Real}
-    ghg_radiative_efficiency::AbstractVector{<:Real}
+    radiative_efficiency::AbstractVector{<:Real}
 end
 
 
-function Meinshausen2020(C₀::AbstractVector{<:Real}, scaling::AbstractVector{<:Real}, ghg_radiative_efficiency::AbstractVector{<:Real})
-    return Meinshausen2020(-2.4785e-07, 0.00075906, -0.0021492, 5.2488, -0.00034197, 0.00025455, -0.00024357, 0.12173, -8.9603e-05, -0.00012462, 0.045194, C₀, scaling, ghg_radiative_efficiency)
+function Meinshausen2020(C₀::AbstractVector{<:Real}, scaling::AbstractVector{<:Real}, radiative_efficiency::AbstractVector{<:Real})
+    return Meinshausen2020(-2.4785e-07, 0.00075906, -0.0021492, 5.2488, -0.00034197, 0.00025455, -0.00024357, 0.12173, -8.9603e-05, -0.00012462, 0.045194, C₀, scaling, radiative_efficiency)
 end 
 
 
 function Meinshausen2020(path::String, species::Vector{String})
     params = load_meinshausen20_params(path, species)
-    return Meinshausen2020(params.C₀, params.scaling, params.ghg_radiative_efficiency)
+    return Meinshausen2020(params.C₀, params.scaling, params.radiative_efficiency)
 end
 
 
