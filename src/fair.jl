@@ -2,7 +2,7 @@ module FaIR
 
 export Emissions
 export ReservoirModel, EtoC, α
-export Meinshausen2020, Leach21, CtoF
+export Meinshausen2020, Leach21, CtoF, compute_ghg_forcing
 export BoxModel, ebm_dynamics, FtoT, run
 
 
