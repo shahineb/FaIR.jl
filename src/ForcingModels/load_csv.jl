@@ -40,7 +40,9 @@ function load_contrails_forcing_params(path, species)
     row = load_and_filter_species(path, species)
     scaling = row.forcing_scale
     radiative_efficiency = row.contrails_radiative_efficiency
-    return (scaling=scaling, radiative_efficiency=radiative_efficiency)
+    C₀ = row.forcing_reference_concentration
+    E₀ = row.forcing_reference_emissions
+    return (scaling=scaling, radiative_efficiency=radiative_efficiency, C₀=C₀, E₀=E₀)
 end
 
 
@@ -48,7 +50,9 @@ function load_lapsi_forcing_params(path, species)
     row = load_and_filter_species(path, species)
     scaling = row.forcing_scale
     radiative_efficiency = row.lapsi_radiative_efficiency
-    return (scaling=scaling, radiative_efficiency=radiative_efficiency)
+    C₀ = row.forcing_reference_concentration
+    E₀ = row.forcing_reference_emissions
+    return (scaling=scaling, radiative_efficiency=radiative_efficiency, C₀=C₀, E₀=E₀)
 end
 
 
@@ -64,7 +68,9 @@ function load_landuse_forcing_params(path, species)
     row = load_and_filter_species(path, species)
     scaling = row.forcing_scale
     radiative_efficiency = row.land_use_cumulative_emissions_to_forcing
-    return (scaling=scaling, radiative_efficiency=radiative_efficiency)
+    C₀ = row.forcing_reference_concentration
+    E₀ = row.forcing_reference_emissions
+    return (scaling=scaling, radiative_efficiency=radiative_efficiency, C₀=C₀, E₀=E₀)
 end
 
 
@@ -73,9 +79,11 @@ function load_aci_forcing_params(path, species)
     scaling = row.forcing_scale
     β = row.aci_scale
     s = row.aci_shape
+    C₀ = row.forcing_reference_concentration
+    E₀ = row.forcing_reference_emissions
     idx_E = row.aerosol_chemistry_from_emissions
     idx_C = row.aerosol_chemistry_from_concentration
-    return (scaling=scaling, β=β, s=s, idx_E=idx_E, idx_C=idx_C)
+    return (scaling=scaling, β=β, s=s, C₀=C₀, E₀=E₀, idx_E=idx_E, idx_C=idx_C)
 end
 
 
@@ -85,5 +93,5 @@ function load_ari_forcing_params(path, species)
     radiative_efficiency = row.erfari_radiative_efficiency
     idx_E = row.aerosol_chemistry_from_emissions
     idx_C = row.aerosol_chemistry_from_concentration
-    return (scaling=scaling, radiative_efficiency=radiative_efficiency, idx_E=idx_E, idx_C=idx_C)
+    return (scaling=scaling, radiative_efficiency=radiative_efficiency,  C₀=C₀, E₀=E₀, idx_E=idx_E, idx_C=idx_C)
 end
