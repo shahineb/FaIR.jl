@@ -15,7 +15,7 @@ function ACIForcing(path::String, species::Vector{String})
 end
 
 
-function compute_forcing(fm::ACIForcing, E, C, E₀, C₀)
+function computeF(fm::ACIForcing, E, C, E₀, C₀)
     sᴱ = fm.s .* fm.idx_E
     sᶜ = fm.s .* fm.idx_E
 

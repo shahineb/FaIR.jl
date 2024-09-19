@@ -2,6 +2,8 @@ struct LinearForcing{T} <: OptionalForcing
     species::Vector{String}
     scaling::AbstractVector{<:Real}
     radiative_efficiency::AbstractVector{<:Real}
+    E₀::AbstractVector{<:Real}
+    C₀::AbstractVector{<:Real}
 end
 
 
@@ -32,11 +34,16 @@ end
 
 function LinearForcing{T}(path::String, species::Vector{String}) where T
     params = loading_method(T)(path, species)
-    return LinearForcing{T}(species, params.scaling, params.radiative_efficiency)
+    return LinearForcing{T}(species, params.scaling, params.radiative_efficiency, params.E₀, params.C₀)
 end
 
 
 
-function compute_forcing(fm::LinearForcing, driver, driver₀)
+function computeF(fm::LinearForcing, driver, driver₀)
     return ((driver .- driver₀) .* fm.radiative_efficiency) .* fm.scaling
 end
+computeF(fm::MinorGHGForcing, C) = computeF(fm, C, fm.C₀)
+computeF(fm::ContrailsForcing, E) = computeF(fm, E, zeros(size(E)))
+computeF(fm::LAPSIForcing, E) = computeF(fm, E, fm.E₀)
+computeF(fm::StratosphericVapourForcing, C) = computeF(fm, C, fm.C₀)
+computeF(fm::LandUseForcing, Eᶜᵘᵐ) = computeF(fm, Eᶜᵘᵐ, zeros(size(Eᶜᵘᵐ)))

@@ -15,7 +15,7 @@ export MinorGHGForcing,
        LandUseForcing,
        ACIForcing,
        ARIForcing,
-       compute_forcing
+       computeF
 
 export BoxModel, ebm_dynamics, FtoT, run
 

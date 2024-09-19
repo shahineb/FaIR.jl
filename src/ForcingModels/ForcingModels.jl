@@ -1,8 +1,10 @@
 module ForcingModels
 
+# Required forcing models
 export Meinshausen2020,
        Leach21
 
+# Optional forcing models
 export MinorGHGForcing,
        ContrailsForcing,
        LAPSIForcing,
@@ -11,22 +13,17 @@ export MinorGHGForcing,
        ACIForcing,
        ARIForcing
 
-export compute_forcing
+# Dispath of forcing generic computation function
+export computeF
 
 
-include("RequiredForcingModels/RequiredForcingModels.jl")
-using .RequiredForcingModels
+include("forcing_model.jl")
+include("load_csv.jl")
+include("RequiredForcingModels/meinshausen2020.jl")
+include("RequiredForcingModels/leach21.jl")
+include("OptionalForcingModels/linear_forcing.jl")
+include("OptionalForcingModels/ari_forcing.jl")
+include("OptionalForcingModels/aci_forcing.jl")
 
-include("OptionalForcingModels/OptionalForcingModels.jl")
-using .OptionalForcingModels
-
-
-function compute_forcing(fm::RequiredForcing, args...)
-    return RequiredForcingModels.compute_forcing(fm, args...)
-end
-
-function compute_forcing(fm::OptionalForcing, args...)
-    return OptionalForcingModels.compute_forcing(fm, args...)
-end
 
 end

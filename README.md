@@ -4,13 +4,12 @@
 [x] Clean up ebm (make the forward methods compact like for the other modules)
 [x] Change dirty constructors to clean constructing functions
 [x] Implement more sophisticated forcing function that allows to load the actual file
+[x] Implement linear forcing and aerosol forcing modules that load all the parameters needed from csv (scaling, efficiency, concentration_idx, emission_idx) so that I can then only pass that to the calculation function
+[x] Figure out whether implementation of functions makes sense in terms of vectors dimensions (related to above task)
+[x] Implement everything dirtily with SO2 being handled on the side as linear + ACI
 
-[ ] Implement linear forcing and aerosol forcing modules that load all the parameters needed from csv (scaling, efficiency, concentration_idx, emission_idx) so that I can then only pass that to the calculation function
-[ ] Figure out whether implementation of functions makes sense in terms of vectors dimensions (related to above task)
-[ ] Implement everything dirtily with SO2 being handled on the side as linear + ACI
 
-
-[ ] Reconvene to find a sensible way to refactor forcing module. Ideally, I would want to have a single forcing model initialisation which takes as arguments the other forcing models. The problem is that the split isn't clear because linear also applies to some ghg, not all ghg need to be used at the same time.
+[x] Reconvene to find a sensible way to refactor forcing module. Ideally, I would want to have a single forcing model initialisation which takes as arguments the other forcing models. The problem is that the split isn't clear because linear also applies to some ghg, not all ghg need to be used at the same time.
     - Category 1 : necessary agents (CO2, CH4, N2O) -> need to be used so might as well set emissions to zero if they're not there. Can manipulate their indices explicitely since they will always be there. Maybe I can define a function that maps any concentration vector to a 3-vector with zeros in case some are missing
 
     - Category 2 : optional agents (SO2, BC, minor GHG) -> do not need to be used, so need to find a way to distinguish them in the emission/concentration vector. I think the Input instance should have a split between necessary and unnecessary forcings.
