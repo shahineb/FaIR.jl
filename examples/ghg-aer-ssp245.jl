@@ -21,7 +21,9 @@ ebm_csv = "src/defaults/4xCO2_cummins_ebm3.csv"              # EBM params
 #
 # ### Load emissions
 # 
-# Emissions must include at least CO₂, CH₄ and N₂O. If data is missing for one, we set it to zero (TODO).
+# Emissions must include at least CO₂, CH₄ and N₂O. If data is missing for one, you need to
+# set it to zero in the emission file. (TODO : take care of this internally)
+#
 # The order in which the species are specified specifies the rows on which they act
 # in the emission, concentration and forcing arrays.
 species = ["CO2", "CH4", "N2O", "SO2", "BC"]
@@ -39,12 +41,12 @@ gas_model = ReservoirModel(species_csv, species)
 # ### Initialise main greenhouse gas forcing model
 # 
 # This is the forcing model for CO₂, CH₄, N₂O. It must be included in any run.
-# TODO : unnecessary to specify species here because they're always going to be the same
-# TODO : can I change the index so that it works with active_dims as well
-idxCO₂ = 1
-idxCH₄ = 2
-idxN₂O = 3
-CO₂_CH₄_N₂O_forcing = Meinshausen2020(species_csv, ["CO2", "CH4", "N2O"], idxCO₂, idxCH₄, idxN₂O)
+#
+# We need to provide it with row index on which CO₂, CH₄ and  N₂O are active
+# in the emission, concentration and forcing arrays (in this particular order).
+# In the example below, CO₂ corresponds to the 1ˢᵗ row, CH₄ on the 2ⁿᵈ and N₂O the 3ʳᵈ
+active_dims_CO₂_CH₄_N₂O = [1, 2, 3]
+CO₂_CH₄_N₂O_forcing = Meinshausen2020(species_csv, active_dims_CO₂_CH₄_N₂O)
 
 
 
@@ -79,13 +81,14 @@ aci_forcing = ACIForcing(species_csv, species_aci, active_dims_aci)
 # a stochastic internal variability components following Cummins et al. 2020.
 #
 # We precompute the temperature feedback matrix eᴬ, forcing feedback vector bd
-# and the sampled internal variability trajectory wd
+# and the sampled internal variability trajectory wd TODO : find a way to make wd optional
 
+use_internal_variability = false        # whether or not sample from internal variability
 seed = 2                                # seed set to sample internal variability
 Δt = 1.                                 # yearly time step
 Nₜ = length(E.year)                      # number of years 
 ebm = BoxModel(ebm_csv, seed, Δt, Nₜ)
-eᴬ, bd, wd = ebm_dynamics(ebm)
+eᴬ, bd, wd = ebm_dynamics(ebm, use_internal_variability)
 
 
 

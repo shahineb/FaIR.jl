@@ -27,15 +27,12 @@ struct BoxModel
         Nbox = length(C)
         new(Nbox, C ./ Δt, κ, ε, F₄ₓ, ση, σξ, γ, seed, Δt, Nₜ)
     end
+end
 
-    function BoxModel(path::String,
-                      seed::Int,
-                      Δt::Real,
-                      Nₜ::Int)
-        params = load_box_model_params(path)
-        Nbox = length(params.C)
-        new(Nbox, params.C ./ Δt, params.κ, params.ε, params.F₄ₓ, params.ση, params.σξ, params.γ, seed, Δt, Nₜ)
-    end
+
+function BoxModel(path::String, seed::Int, Δt::Real, Nₜ::Int)
+    params = load_box_model_params(path)
+    return BoxModel(params.C, params.κ, params.ε, params.F₄ₓ, params.ση, params.σξ, params.γ, seed, Δt, Nₜ)
 end
 
 
@@ -122,7 +119,7 @@ function emergentparameters(ebm::BoxModel, ratio₂ₓ₄ₓ=0.5)
 end
 
 
-function ebm_dynamics(ebm::BoxModel)
+function ebm_dynamics(ebm::BoxModel, internal_variability)
     # Compute exp(A)
     A = computeA(ebm)
     eᴬ = exp(A)
@@ -133,7 +130,11 @@ function ebm_dynamics(ebm::BoxModel)
     bd = A \ ((eᴬ - I) * b)
 
     # Sample internal variability updates
-    wd = samplevariability(ebm)
+    if internal_variability
+        wd = samplevariability(ebm)
+    else
+        wd = zeros(ebm.Nₜ, ebm.Nbox + 1)
+    end
     return eᴬ, bd, wd
 end
 
