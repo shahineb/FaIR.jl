@@ -11,7 +11,8 @@ export MinorGHGForcing,
        StratosphericVapourForcing,
        LandUseForcing,
        ACIForcing,
-       ARIForcing
+       ARIForcing,
+       VolcanicForcing
 
 # Dispath of forcing generic computation function
 export computeF
@@ -24,6 +25,6 @@ include("RequiredForcingModels/leach21.jl")
 include("OptionalForcingModels/linear_forcing.jl")
 include("OptionalForcingModels/ari_forcing.jl")
 include("OptionalForcingModels/aci_forcing.jl")
-
+include("PrescribedForcings/volcanic_forcing.jl")
 
 end
