@@ -1,4 +1,4 @@
-struct ARIForcing
+struct ARIForcing <: OptionalForcing
     species::Vector{String}
     scaling::AbstractVector{<:Real}
     radiative_efficiency::AbstractVector{<:Real}
@@ -14,7 +14,7 @@ function ARIForcing(path::String, species::Vector{String})
 end
 
 
-function compute_ari_forcing(fm::ARIForcing, E, C, E₀, C₀)
+function compute_forcing(fm::ARIForcing, E, C, E₀, C₀)
     ΔE = E .- E₀
     ΔC = C .- C₀
     F = (ΔE .+ ΔC) .* fm.radiative_efficiency .* fm.scaling

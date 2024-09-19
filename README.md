@@ -26,6 +26,7 @@ Maybe I can have a general forcing struct which takes all of these into it, but 
 filter(kv -> kv ∈ [:CO2, :CH4], keys(E.index)) -> maybe a way to filter based on species but looks cumbersome
 
 
+[ ] See whether I can remove species specification in RequiredForcing (maybe with dummy defaults)
 [ ] Methane lifetime update -> might mean I need to think of a way to distinguish species in alpha
 [ ] Allow to use prescribed forcing for Volcanic activity
 [ ] Make it possible to load multiple configs (not too hard, only applies to ebm)

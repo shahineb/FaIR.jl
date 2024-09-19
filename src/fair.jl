@@ -8,17 +8,14 @@ export Meinshausen2020,
        Leach21,
        compute_CO₂_CH₄_N₂O_forcing
 
-export LinearForcing,
-       MinorGHGForcing,
+export MinorGHGForcing,
        ContrailsForcing,
        LAPSIForcing,
        StratosphericVapourForcing,
        LandUseForcing,
        ACIForcing,
        ARIForcing,
-       compute_linear_forcing,
-       compute_aci_forcing,
-       compute_ari_forcing
+       compute_forcing
 
 export BoxModel, ebm_dynamics, FtoT, run
 

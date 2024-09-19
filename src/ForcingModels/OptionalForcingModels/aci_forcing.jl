@@ -1,5 +1,4 @@
-
-struct ACIForcing
+struct ACIForcing <: OptionalForcing
     species::Vector{String}
     scaling::AbstractVector{<:Real}
     s::AbstractVector{<:Real}
@@ -16,7 +15,7 @@ function ACIForcing(path::String, species::Vector{String})
 end
 
 
-function compute_aci_forcing(fm::ACIForcing, E, C, E₀, C₀)
+function compute_forcing(fm::ACIForcing, E, C, E₀, C₀)
     sᴱ = fm.s .* fm.idx_E
     sᶜ = fm.s .* fm.idx_E
 
@@ -25,5 +24,3 @@ function compute_aci_forcing(fm::ACIForcing, E, C, E₀, C₀)
     F = fm.scaling .* fm.β .* (R - R₀)
     return F
 end
-
-# Can probably call all these methdos "compute forcing" and just dispatch on argument type, let's see in the end

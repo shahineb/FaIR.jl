@@ -7,7 +7,7 @@ species_csv = "src/defaults/species_configs_properties.csv"
 ebm_csv = "src/defaults/4xCO2_cummins_ebm3.csv"
 
 # Define emissions
-species = ["CO2", "CH4", "N2O"]
+species = ["CO2", "CH4", "N2O", "SO2", "BC"]
 E = Emissions(emission_csv, species)
 
 # Define gas cycle model
@@ -16,6 +16,8 @@ gas_model = ReservoirModel(species_csv, species)
 # Define forcing models
 CO₂_CH₄_N₂O_forcing_model = Meinshausen2020(species_csv, ["CO2", "CH4", "N2O"])
 ari_forcing = ARIForcing(species_csv, ["SO2", "BC"])
+
+compute_forcing(ari_forcing, ones(2),  ones(2), ones(2), ones(2))
 
 
 # Define energy balance model

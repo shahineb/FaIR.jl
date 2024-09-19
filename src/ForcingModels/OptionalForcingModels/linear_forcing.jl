@@ -1,4 +1,4 @@
-struct LinearForcing{T}
+struct LinearForcing{T} <: OptionalForcing
     species::Vector{String}
     scaling::AbstractVector{<:Real}
     radiative_efficiency::AbstractVector{<:Real}
@@ -37,6 +37,6 @@ end
 
 
 
-function compute_linear_forcing(fm::LinearForcing, driver, driver₀)
+function compute_forcing(fm::LinearForcing, driver, driver₀)
     return ((driver .- driver₀) .* fm.radiative_efficiency) .* fm.scaling
 end
