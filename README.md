@@ -22,7 +22,8 @@ Maybe I can have a general forcing struct which takes all of these into it, but 
 - [x] Reimplement the forcing module in terms of categories of forcing, along with the Input module which should have indices for categories of forcing
 
 
-- [ ] Implement clean indexing of species that allows clean pass into forcing models (i.e. query index from symbol in E.index)
+- [x] Implement clean indexing of species that allows clean pass into forcing models (i.e. query index from symbol in E.index)
+- [ ] Wrap the run in a run module
 - [ ] See whether I can remove species specification in RequiredForcing (maybe with dummy defaults)
 - [ ] Methane lifetime update -> might mean I need to think of a way to distinguish species in alpha
 - [x] Allow to use prescribed forcing for Volcanic activity

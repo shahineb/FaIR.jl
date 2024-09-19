@@ -1,61 +1,154 @@
 using FaIR
-using CSV, DataFrames
 using GLMakie
 
-# Path to parameter files
-emission_csv = "src/defaults/ssp245-emissions.csv"
-species_csv = "src/defaults/species_configs_properties.csv"
-ebm_csv = "src/defaults/4xCO2_cummins_ebm3.csv"
 
-# Define emissions
+# ## Path to files to load
+#
+# See files in src/defaults/ for the format these files must have.
+# The species config file follows the format from https://github.com/OMS-NetZero/FAIR/blob/master/src/fair/defaults/data/ar6/species_configs_properties.csv
+# The energy balance parameters file follows the format from https://github.com/OMS-NetZero/FAIR/blob/master/tests/test_data/4xCO2_cummins_ebm3.csv
+#
+# At the moment this code support emissions as an input type. The input data 
+# for FaIR is yearly global emission data for different species.
+
+emission_csv = "src/defaults/ssp245-emissions.csv"           # Input emission data
+species_csv = "src/defaults/species_configs_properties.csv"  # Species configs
+ebm_csv = "src/defaults/4xCO2_cummins_ebm3.csv"              # EBM params
+
+
+
+# ## FaIR components instantiation
+#
+# ### Load emissions
+# 
+# Emissions must include at least CO₂, CH₄ and N₂O. If data is missing for one, we set it to zero (TODO).
+# The order in which the species are specified specifies the rows on which they act
+# in the emission, concentration and forcing arrays.
 species = ["CO2", "CH4", "N2O", "SO2", "BC"]
 E = Emissions(emission_csv, species)
 
-# Define gas cycle model
+
+
+
+# ### Initialise gas cycle model
 gas_model = ReservoirModel(species_csv, species)
 
-# Define forcing models
-CO₂_CH₄_N₂O_forcing_model = Meinshausen2020(species_csv, ["CO2", "CH4", "N2O"])
-ari_forcing = ARIForcing(species_csv, ["CH4", "N2O", "SO2", "BC"])
-aci_forcing = ACIForcing(species_csv, ["SO2", "BC"])
-
-volcanic_df = CSV.read("src/defaults/volcanic_ERF_monthly_175001-201912.csv", DataFrame)
-v = volcanic_df.erf
-reshaped_v = reshape(v, 12, :)
-block_means = sum(reshaped_v, dims=1) ./ 12
-volcanic_forcing = VolcanicForcing([vec(block_means); zeros(351 - 270)])
 
 
-# Define energy balance model
-seed = 2
-Δt = 1.
-Nₜ = length(E.year)
+
+# ### Initialise main greenhouse gas forcing model
+# 
+# This is the forcing model for CO₂, CH₄, N₂O. It must be included in any run.
+# TODO : unnecessary to specify species here because they're always going to be the same
+# TODO : can I change the index so that it works with active_dims as well
+idxCO₂ = 1
+idxCH₄ = 2
+idxN₂O = 3
+CO₂_CH₄_N₂O_forcing = Meinshausen2020(species_csv, ["CO2", "CH4", "N2O"], idxCO₂, idxCH₄, idxN₂O)
+
+
+
+
+
+# ### Initialise other optional forcing models
+#
+# These are additional models that allow to account for additional sources of
+# forcing such as minor greenhouse gas, aerosols, contrails, land use etc.
+#
+# Each forcing model needs to be instantiated with a list of species which effect
+# we want to account for, and the dimensions (row index) on which they are active
+# in the emission, concentration and forcing arrays
+
+# #### Forcing model for aerosol direct effect
+species_ari = ["CH4", "N2O", "SO2", "BC"]
+active_dims_ari = [2, 3, 4, 5]
+ari_forcing = ARIForcing(species_csv, species_ari, active_dims_ari)
+
+# #### Forcing model for aerosol-cloud interactions
+species_aci = ["SO2", "BC"]
+active_dims_aci = [4, 5]
+aci_forcing = ACIForcing(species_csv, species_aci, active_dims_aci)
+
+
+
+
+
+# ### Initialise energy balance model
+#
+# The energy balance model is here setup as a 3-box model and includes
+# a stochastic internal variability components following Cummins et al. 2020.
+#
+# We precompute the temperature feedback matrix eᴬ, forcing feedback vector bd
+# and the sampled internal variability trajectory wd
+
+seed = 2                                # seed set to sample internal variability
+Δt = 1.                                 # yearly time step
+Nₜ = length(E.year)                      # number of years 
 ebm = BoxModel(ebm_csv, seed, Δt, Nₜ)
 eᴬ, bd, wd = ebm_dynamics(ebm)
 
-# Run model
-n_species = length(species)
+
+
+
+
+
+# ### Allocate arrays for the run
+#
+# For the gas cycle model, we initialise four arrays :
+#   - `pool_partition` : running per specie burden in each atmospheric lifetime pool
+#   - `airborneₜ` : per specie total cumulative emission remaining in the atmosphere
+#   - `E₀` : baseline emissions for each specie
+#   - `C` : per specie total atmospheric concentration at each time step
 n_pool = 4
+n_species = length(species)
 pool_partition = zeros(Real, n_species, n_pool)
-E₀ = zeros(length(species))
-iirfmax = 100.
 airborneₜ = zeros(Real, n_species)
-αs = zeros(Real, size(E.values))
+E₀ = zeros(length(species))
 C = zeros(Real, size(E.values))
 C[:, 1] = gas_model.C₀
+
+
+# For the forcing we initialise an array of forcing per specie at each time step
 F = zeros(Real, size(E.values))
+
+# For the energy balance model, we intialise an array of each box temperature at
+# each time step, with an additional box dedicated to the TOA forcing fluctuations
+# following the procedure in Cummins et al. 2020.
 T = zeros(Real, ebm.Nₜ, ebm.Nbox + 1)
+active_dims_ghg = [E.index.CO2, E.index.CH4, E.index.N2O] # TODO : not needing this anymore
 
 
+
+
+
+
+# ### Run FaIR
+#
 for t in 2:Nₜ
-    αs[:, t - 1] = α(gas_model, airborneₜ, E.cumulative[:, t - 1], T[t - 1, 2], iirfmax)
-    C[:, t], pool_partition = EtoC(gas_model, E.values[:, t - 1], pool_partition, αs[:, t - 1], E₀, Δt)
-    FCO₂_CH₄_N₂O = computeF(CO₂_CH₄_N₂O_forcing_model, C[:, t], E.index.CO2, E.index.CH4, E.index.N2O)
-    Fari = computeF(ari_forcing, E.values[2:end, t], C[2:end, t])
-    Faci = computeF(aci_forcing, E.values[4:end, t], C[4:end, t])
-    F[:, t] = [FCO₂_CH₄_N₂O; 0; 0] .+ [0.; Fari] .+ [0.; 0.; 0; Faci]
-    T[t, :] = FtoT(T[t - 1, :], eᴬ, bd, wd[t - 1, :], sum(F[:, t]) + volcanic_forcing.values[t])
+    # Compute feedback gas lifetime scaling factor
+    αₜ = α(gas_model, airborneₜ, E.cumulative[:, t - 1], T[t - 1, 2])
+
+    # Compute concentrations and reservoirs partition
+    C[:, t], pool_partition = EtoC(gas_model, E.values[:, t - 1], pool_partition, αₜ, E₀, Δt)
+
+    # Compute forcings from the 3 major greenhouse gases
+    FCO₂_CH₄_N₂O = computeF(CO₂_CH₄_N₂O_forcing, C[:, t])
+    F[active_dims_ghg, t] .+= FCO₂_CH₄_N₂O
+
+    # Compute aerosol direct effect forcing
+    Fari = computeF(ari_forcing, E.values[:, t], C[:, t])
+    F[ari_forcing.active_dims, t] .+= Fari
+
+    # Compute aerosol-cloud interaction forcing
+    Faci = computeF(aci_forcing, E.values[:, t], C[:, t])
+    F[aci_forcing.active_dims, t] .+= Faci
+    
+    # Compute boxes temperatures responses to forcing
+    T[t, :] = FtoT(T[t - 1, :], eᴬ, bd, wd[t - 1, :], sum(F[:, t]))
 end
+
+
+
 
 
 # Emissions plot
@@ -63,11 +156,7 @@ fig = Figure()
 units = ["GtC/yr", "Mt CH₄/yr", "Mt N₂O/yr", "Mt SO₂/yr", "Mt BC/yr"]
 for i in 1:n_species
     ax = Axis(fig[1, i]; xlabel = "Year", ylabel = units[i], title = species[i])
-    
-    # Plot the emissions over time
     lines!(ax, E.year, E.values[i, :], label=species[i])
-    
-    # Enable legend
     axislegend(ax, position=:rb)
 end
 display(fig)
@@ -78,11 +167,7 @@ fig = Figure()
 units = ["ppm", "ppb", "ppb"]
 for i in 1:n_species-2
     ax = Axis(fig[1, i]; xlabel = "Year", ylabel = units[i], title = species[i])
-    
-    # Plot the concentration over time
     lines!(ax, E.year, C[i, :], label=species[i])
-    
-    # Enable legend
     axislegend(ax, position=:rb)
 end
 display(fig)
@@ -92,15 +177,11 @@ display(fig)
 fig = Figure()
 for i in 1:n_species
     ax = Axis(fig[1, i]; xlabel = "Year", ylabel = "Wm⁻²", title = species[i])
-    
-    # Plot the forcing over time
     lines!(ax, E.year, F[i, :], label=species[i])
-    
-    # Enable legend
     axislegend(ax, position=:lt)
 end
 ax = Axis(fig[1, n_species + 1]; xlabel = "Year", ylabel = "Wm⁻²", title = "Total")
-lines!(ax, E.year, vec(sum(F, dims=1)) + volcanic_forcing.values, label="Total")
+lines!(ax, E.year, vec(sum(F, dims=1)), label="Total")
 axislegend(ax, position=:rb)
 display(fig)
 
@@ -110,5 +191,7 @@ fig = Figure()
 ax = Axis(fig[1, 1]; xlabel = "Year", ylabel = "ΔT (K)", title = "GMST")
 lines!(ax, E.year, T[:, 2])
 display(fig)
+
+
 
 GLMakie.closeall()

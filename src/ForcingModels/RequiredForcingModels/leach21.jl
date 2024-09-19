@@ -16,6 +16,7 @@ function Leach21(path::String, species::Vector{String})
 end
 
 function computeF(fm::Leach21, C, idxCO₂, idxCH₄, idxN₂O)
+    # TODO : remove indexing from arguments
     C_CO₂ = C[idxCO₂]
     C_CH₄ = C[idxCH₄]
     C_N₂O = C[idxN₂O]
