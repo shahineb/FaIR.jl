@@ -1,8 +1,8 @@
 struct ACIForcing <: OptionalForcing
     species::Vector{String}
     scaling::AbstractVector{<:Real}
-    s::AbstractVector{<:Real}
-    β::AbstractVector{<:Real}
+    s::AbstractVector{<:Real}  # sensitivity = shape
+    β::AbstractVector{<:Real}  # scale
     E₀::AbstractVector{<:Real}
     C₀::AbstractVector{<:Real}
     idx_E::AbstractVector{<:Real}
@@ -19,9 +19,15 @@ end
 
 function computeF(fm::ACIForcing, E, C)
     sᴱ = fm.s .* fm.idx_E
-    sᶜ = fm.s .* fm.idx_E
-    R₀ = log(1 + sum(fm.E₀ .* sᴱ) + sum(fm.C₀ .* sᶜ))
-    R = log(1 + sum(E .* sᴱ) + sum(C .* sᶜ))
+    sᶜ = fm.s .* fm.idx_C
+
+    E₀ = ifelse.(isnan.(fm.E₀), 0.0, fm.E₀)
+    E = ifelse.(isnan.(E), 0.0, E)
+    C₀ = ifelse.(isnan.(fm.C₀), 0.0, fm.C₀)
+    C = ifelse.(isnan.(C), 0.0, C)
+
+    R₀ = log.(1 .+ E₀ .* sᴱ .+ C₀ .* sᶜ)
+    R = log.(1 .+ E .* sᴱ .+ C .* sᶜ)
     F = fm.scaling .* fm.β .* (R - R₀)
     return F
 end

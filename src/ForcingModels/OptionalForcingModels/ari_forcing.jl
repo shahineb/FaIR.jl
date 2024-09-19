@@ -19,6 +19,8 @@ end
 function computeF(fm::ARIForcing, E, C)
     ΔE = E .- fm.E₀
     ΔC = C .- fm.C₀
+    ΔE = ifelse.(isnan.(ΔE), 0.0, ΔE)
+    ΔC = ifelse.(isnan.(ΔC), 0.0, ΔC)
     F = (ΔE .+ ΔC) .* fm.radiative_efficiency .* fm.scaling
     return F
 end

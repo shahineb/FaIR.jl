@@ -15,11 +15,10 @@ gas_model = ReservoirModel(species_csv, species)
 
 # Define forcing models
 CO₂_CH₄_N₂O_forcing_model = Meinshausen2020(species_csv, ["CO2", "CH4", "N2O"])
-ari_forcing = ARIForcing(species_csv, ["SO2", "BC"])
-ghg_forcing = MinorGHGForcing(species_csv, ["CH4"])
+ari_forcing = ARIForcing(species_csv, ["CH4", "N2O", "SO2", "BC"])
+aci_forcing = ACIForcing(species_csv, ["SO2", "BC"])
 
-computeF(ghg_forcing, [1.])
-computeF(CO₂_CH₄_N₂O_forcing_model, ones(3), 1, 2, 3)
+
 
 # Define energy balance model
 seed = 2
@@ -32,7 +31,7 @@ eᴬ, bd, wd = ebm_dynamics(ebm)
 n_species = length(species)
 n_pool = 4
 pool_partition = zeros(Real, n_species, n_pool)
-E₀ = [0., 0., 0.]
+E₀ = zeros(length(species))
 iirfmax = 100.
 airborneₜ = zeros(Real, n_species)
 αs = zeros(Real, size(E.values))
@@ -40,18 +39,38 @@ C = zeros(Real, size(E.values))
 C[:, 1] = gas_model.C₀
 F = zeros(Real, size(E.values))
 T = zeros(Real, ebm.Nₜ, ebm.Nbox + 1)
+
+
 for t in 2:Nₜ
     αs[:, t - 1] = α(gas_model, airborneₜ, E.cumulative[:, t - 1], T[t - 1, 2], iirfmax)
     C[:, t], pool_partition = EtoC(gas_model, E.values[:, t - 1], pool_partition, αs[:, t - 1], E₀, Δt)
-    F[:, t] = compute_ghg_forcing(ghg_forcing_model, C[:, t], E.index.CO2, E.index.CH4, E.index.N2O)
+    FCO₂_CH₄_N₂O = computeF(CO₂_CH₄_N₂O_forcing_model, C[:, t], E.index.CO2, E.index.CH4, E.index.N2O)
+    Fari = computeF(ari_forcing, E.values[2:end, t], C[2:end, t])
+    Faci = computeF(aci_forcing, E.values[4:end, t], C[4:end, t])
+    F[:, t] = [FCO₂_CH₄_N₂O; 0; 0] .+ [0.; Fari] .+ [0.; 0.; 0; Faci]
     T[t, :] = FtoT(T[t - 1, :], eᴬ, bd, wd[t - 1, :], sum(F[:, t]))
 end
+
+
+# Emissions plot
+fig = Figure()
+units = ["GtC/yr", "Mt CH₄/yr", "Mt N₂O/yr", "Mt SO₂/yr", "Mt BC/yr"]
+for i in 1:n_species
+    ax = Axis(fig[1, i]; xlabel = "Year", ylabel = units[i], title = species[i])
+    
+    # Plot the emissions over time
+    lines!(ax, E.year, E.values[i, :], label=species[i])
+    
+    # Enable legend
+    axislegend(ax, position=:rb)
+end
+display(fig)
 
 
 # Concentrations plot
 fig = Figure()
 units = ["ppm", "ppb", "ppb"]
-for i in 1:n_species
+for i in 1:n_species-2
     ax = Axis(fig[1, i]; xlabel = "Year", ylabel = units[i], title = species[i])
     
     # Plot the concentration over time
@@ -72,7 +91,7 @@ for i in 1:n_species
     lines!(ax, E.year, F[i, :], label=species[i])
     
     # Enable legend
-    axislegend(ax, position=:rb)
+    axislegend(ax, position=:lt)
 end
 ax = Axis(fig[1, n_species + 1]; xlabel = "Year", ylabel = "Wm⁻²", title = "Total")
 lines!(ax, E.year, vec(sum(F, dims=1)), label="Total")

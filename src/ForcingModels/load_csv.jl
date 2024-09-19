@@ -75,9 +75,10 @@ end
 
 
 function load_aci_forcing_params(path, species)
+    row = load_and_filter_species(path, ["Aerosol-cloud interactions"])
+    β = fill(row.aci_scale[1], size(species))
     row = load_and_filter_species(path, species)
     scaling = row.forcing_scale
-    β = row.aci_scale
     s = row.aci_shape
     C₀ = row.forcing_reference_concentration
     E₀ = row.forcing_reference_emissions
@@ -91,6 +92,8 @@ function load_ari_forcing_params(path, species)
     row = load_and_filter_species(path, species)
     scaling = row.forcing_scale
     radiative_efficiency = row.erfari_radiative_efficiency
+    C₀ = row.forcing_reference_concentration
+    E₀ = row.forcing_reference_emissions
     idx_E = row.aerosol_chemistry_from_emissions
     idx_C = row.aerosol_chemistry_from_concentration
     return (scaling=scaling, radiative_efficiency=radiative_efficiency,  C₀=C₀, E₀=E₀, idx_E=idx_E, idx_C=idx_C)
