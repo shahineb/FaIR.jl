@@ -28,6 +28,7 @@ Maybe I can have a general forcing struct which takes all of these into it, but 
 - [x] Allow to use prescribed forcing for Volcanic activity
 - [ ] Make it possible to load multiple configs (not too hard, only applies to ebm)
 - [ ] Start documenting code
+- [ ] SCM struct that gets all the previous things?
 - [x] Harmonise modules, struct, function naming
 - [ ] Add an option to sample multiple trajectories from internal variability
 - [ ] Sampling from parameters?

@@ -1,7 +1,6 @@
-abstract type ForcingModel end
-abstract type RequiredForcing <: ForcingModel end
-abstract type OptionalForcing <: ForcingModel end
-abstract type PrescribedForcing <: OptionalForcing end
+abstract type AbstractForcingModel end
+struct RequiredForcing <: AbstractForcingModel end
+struct OptionalForcing <: AbstractForcingModel end
 
 struct Forcing
     required_forcing::RequiredForcing

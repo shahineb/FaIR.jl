@@ -1,3 +1,3 @@
-struct VolcanicForcing <: PrescribedForcing
+struct VolcanicForcing <: OptionalForcing
     values::AbstractVector{<:Real}
 end
