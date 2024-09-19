@@ -1,4 +1,12 @@
-# fair.jl
+# FaIR
+
+---
+
+An attempt at reimplementing the [Finite-amplitude Impulse Response](https://github.com/OMS-NetZero/FAIR/tree/master) climate model in Julia.
+
+
+
+---
 
 
 - [x] Clean up ebm (make the forward methods compact like for the other modules)
