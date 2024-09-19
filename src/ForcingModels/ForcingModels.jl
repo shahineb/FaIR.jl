@@ -12,6 +12,9 @@ export LinearForcing,
        LandUseForcing,
        compute_linear_forcing
 
+export ACIForcing, compute_aci_forcing
+export ARIForcing, compute_ari_forcing
+
 
 include("RequiredForcingModels/RequiredForcingModels.jl")
 using .RequiredForcingModels

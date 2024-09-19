@@ -14,7 +14,11 @@ export LinearForcing,
        LAPSIForcing,
        StratosphericVapourForcing,
        LandUseForcing,
-       compute_linear_forcing
+       ACIForcing,
+       ARIForcing,
+       compute_linear_forcing,
+       compute_aci_forcing,
+       compute_ari_forcing
 
 export BoxModel, ebm_dynamics, FtoT, run
 

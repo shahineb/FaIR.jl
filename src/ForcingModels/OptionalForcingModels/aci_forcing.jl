@@ -1,10 +1,29 @@
-function compute_aci_forcing(E, C, E₀, C₀, scaling, β, s, idx_E, idx_C)
-    sᴱ = s[idx_from_E]
-    sᶜ = s[idx_from_C]
 
-    R₀ = log(1 + sum(E₀[idx_E] .* sᴱ) + sum(C₀[idx_C] .* sᶜ))
-    R = log(1 + sum(E[idx_E] .* sᴱ) + sum(C[idx_C] .* sᶜ))
-    F = scaling * β * (R - R₀)
+struct ACIForcing
+    species::Vector{String}
+    scaling::AbstractVector{<:Real}
+    s::AbstractVector{<:Real}
+    β::AbstractVector{<:Real}
+    idx_E::AbstractVector{<:Real}
+    idx_C::AbstractVector{<:Real}
+end
+
+
+
+function ACIForcing(path::String, species::Vector{String})
+    params = load_aci_forcing_params(path, species)
+    return ACIForcing(species, params.scaling, params.s, params.β, params.idx_E, params.idx_C)
+end
+
+
+function compute_aci_forcing(fm::ACIForcing, E, C, E₀, C₀)
+    sᴱ = fm.s .* fm.idx_E
+    sᶜ = fm.s .* fm.idx_E
+
+    R₀ = log(1 + sum(E₀ .* sᴱ) + sum(C₀ .* sᶜ))
+    R = log(1 + sum(E .* sᴱ) + sum(C .* sᶜ))
+    F = fm.scaling .* fm.β .* (R - R₀)
     return F
 end
 
+# Can probably call all these methdos "compute forcing" and just dispatch on argument type, let's see in the end

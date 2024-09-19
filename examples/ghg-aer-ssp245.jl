@@ -15,10 +15,7 @@ gas_model = ReservoirModel(species_csv, species)
 
 # Define forcing models
 CO₂_CH₄_N₂O_forcing_model = Meinshausen2020(species_csv, ["CO2", "CH4", "N2O"])
-minor_ghg_forcing_model = MinorGHGForcing(species_csv, ["CFC-11", "CFC-113", "HCFC-141b", "SF6", "HFC-134a", "HFC-4310mee"])
-
-
-compute_linear_forcing(minor_ghg_forcing_model, ones(6), zeros(6))
+ari_forcing = ARIForcing(species_csv, ["SO2", "BC"])
 
 
 # Define energy balance model

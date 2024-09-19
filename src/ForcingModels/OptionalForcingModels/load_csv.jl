@@ -49,6 +49,27 @@ function load_landuse_forcing_params(path, species)
 end
 
 
+function load_aci_forcing_params(path, species)
+    row = load_and_filter_species(path, species)
+    scaling = row.forcing_scale
+    β = row.aci_scale
+    s = row.aci_shape
+    idx_E = row.aerosol_chemistry_from_emissions
+    idx_C = row.aerosol_chemistry_from_concentration
+    return (scaling=scaling, β=β, s=s, idx_E=idx_E, idx_C=idx_C)
+end
+
+
+function load_ari_forcing_params(path, species)
+    row = load_and_filter_species(path, species)
+    scaling = row.forcing_scale
+    radiative_efficiency = row.erfari_radiative_efficiency
+    idx_E = row.aerosol_chemistry_from_emissions
+    idx_C = row.aerosol_chemistry_from_concentration
+    return (scaling=scaling, radiative_efficiency=radiative_efficiency, idx_E=idx_E, idx_C=idx_C)
+end
+
+
 # load_ghg_linear_forcing_params("src/defaults/species_configs_properties.csv", ["SO2", "CFC-11", "CO", "CH3Cl"])
 # speciesdf = CSV.read("src/defaults/species_configs_properties.csv", DataFrame)
 
