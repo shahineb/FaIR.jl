@@ -1,4 +1,5 @@
 using FaIR
+using CSV, DataFrames
 using GLMakie
 
 # Path to parameter files
@@ -18,6 +19,11 @@ CO₂_CH₄_N₂O_forcing_model = Meinshausen2020(species_csv, ["CO2", "CH4", "N
 ari_forcing = ARIForcing(species_csv, ["CH4", "N2O", "SO2", "BC"])
 aci_forcing = ACIForcing(species_csv, ["SO2", "BC"])
 
+volcanic_df = CSV.read("src/defaults/volcanic_ERF_monthly_175001-201912.csv", DataFrame)
+v = volcanic_df.erf
+reshaped_v = reshape(v, 12, :)
+block_means = sum(reshaped_v, dims=1) ./ 12
+volcanic_forcing = VolcanicForcing([vec(block_means); zeros(351 - 270)])
 
 
 # Define energy balance model
@@ -48,7 +54,7 @@ for t in 2:Nₜ
     Fari = computeF(ari_forcing, E.values[2:end, t], C[2:end, t])
     Faci = computeF(aci_forcing, E.values[4:end, t], C[4:end, t])
     F[:, t] = [FCO₂_CH₄_N₂O; 0; 0] .+ [0.; Fari] .+ [0.; 0.; 0; Faci]
-    T[t, :] = FtoT(T[t - 1, :], eᴬ, bd, wd[t - 1, :], sum(F[:, t]))
+    T[t, :] = FtoT(T[t - 1, :], eᴬ, bd, wd[t - 1, :], sum(F[:, t]) + volcanic_forcing.values[t])
 end
 
 
@@ -94,7 +100,7 @@ for i in 1:n_species
     axislegend(ax, position=:lt)
 end
 ax = Axis(fig[1, n_species + 1]; xlabel = "Year", ylabel = "Wm⁻²", title = "Total")
-lines!(ax, E.year, vec(sum(F, dims=1)), label="Total")
+lines!(ax, E.year, vec(sum(F, dims=1)) + volcanic_forcing.values, label="Total")
 axislegend(ax, position=:rb)
 display(fig)
 
