@@ -180,6 +180,7 @@ end
 lines!(ax, E.year, vec(mean(T[:, :, 2], dims=1)), color=(:purple, 0.8), label="Mean")
 axislegend(ax, position=:lt)
 display(fig)
+save("examples/demo-intermodel-variability.png", fig)
 
 
 

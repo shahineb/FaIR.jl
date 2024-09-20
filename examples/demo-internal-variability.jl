@@ -162,6 +162,7 @@ end
 lines!(ax, E.year, vec(mean(T[:, :, 2], dims=1)), color=(:blue, 0.8), label="Mean")
 axislegend(ax, position=:lt)
 display(fig)
+save("examples/demo-internal-variability.png", fig)
 
 
 
