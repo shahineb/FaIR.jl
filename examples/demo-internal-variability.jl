@@ -80,16 +80,11 @@ aci_forcing = ACIForcing(species_csv, species_aci, active_dims_aci)
 #
 # The energy balance model is here setup as a 3-box model and includes
 # a stochastic internal variability components following Cummins et al. 2020.
-#
-# We define variables for the energy balance model but only initialise it
-# within the loop below since we need one different model per seed (TODO : should definitely make the model independent of the seed)
-Nbox = 3                                # number of temperature boxes in the box model
-use_internal_variability = true         # whether or not sample from internal variability
 Nseeds = 50                             # number of seeds to sample internal variability
 Δt = 1.                                 # yearly time step
 Nₜ = length(E.year)                      # number of years 
-
-
+ebm = BoxModel(ebm_csv, Δt, Nₜ)
+eᴬ, bd, _ = ebm_dynamics(ebm)
 
 
 
@@ -112,7 +107,7 @@ end
 # following the procedure in Cummins et al. 2020. 
 #
 # Here we add an extra dimension for each seed we will sample internal variability from.
-T = zeros(Real, Nseeds, Nₜ, Nbox + 1)
+T = zeros(Real, Nseeds, ebm.Nₜ, ebm.Nbox + 1)
 active_dims_ghg = [E.index.CO2, E.index.CH4, E.index.N2O] # TODO : not needing this anymore
 
 
@@ -124,9 +119,8 @@ active_dims_ghg = [E.index.CO2, E.index.CH4, E.index.N2O] # TODO : not needing t
 #
 n_species = length(species)
 for ω in collect(1:Nseeds)
-    # Initialise a box-model with the seed
-    ebm = BoxModel(ebm_csv, ω, Δt, Nₜ)
-    eᴬ, bd, wd = ebm_dynamics(ebm, use_internal_variability)
+    # Sample from internal variability
+    wd = samplevariability(ebm, ω)
 
     # Allocate arrays
     pool_partition, airborneₜ, E₀, Cₜ₋₁ , C₀ = allocate_gas_cycle(n_species)

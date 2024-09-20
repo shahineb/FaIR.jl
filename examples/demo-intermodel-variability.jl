@@ -137,7 +137,7 @@ active_dims_ghg = [E.index.CO2, E.index.CH4, E.index.N2O] # TODO : not needing t
 n_species = length(species)
 for ω in collect(1:N_ESM)
     # Initialise a box-model with the seed
-    ebm = BoxModel(C[ω, :], κ[ω, :], ε[ω], F₄ₓ[ω], ση[ω], σξ[ω], γ[ω], 0, Δt, Nₜ)
+    ebm = BoxModel(C[ω, :], κ[ω, :], ε[ω], F₄ₓ[ω], ση[ω], σξ[ω], γ[ω], Δt, Nₜ)
     eᴬ, bd, wd = ebm_dynamics(ebm, use_internal_variability)
 
     # Allocate arrays
@@ -174,8 +174,8 @@ end
 # Temperature plot
 fig = Figure()
 ax = Axis(fig[1, 1]; xlabel = "Year", ylabel = "ΔT (K)")
-for ω in 1:Nseeds
-    lines!(ax, E.year, T[ω, :, 2], color=(:blue, 0.2))
+for ω in 1:N_ESM
+    lines!(ax, E.year, T[ω, :, 2], color=(:blue, 0.1))
 end
 lines!(ax, E.year, vec(mean(T[:, :, 2], dims=1)), color=(:purple, 0.8), label="Mean")
 axislegend(ax, position=:lt)

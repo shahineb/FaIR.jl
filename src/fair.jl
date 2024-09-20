@@ -18,7 +18,7 @@ export MinorGHGForcing,
        VolcanicForcing,
        computeF
 
-export BoxModel, ebm_dynamics, FtoT, run
+export BoxModel, ebm_dynamics, samplevariability, FtoT, run
 
 
 include("Inputs/Inputs.jl")

@@ -1,6 +1,6 @@
 module EnergyBalanceModels
 
-export BoxModel, ebm_dynamics, FtoT, run
+export BoxModel, ebm_dynamics, samplevariability, FtoT, run
 
 include("constants.jl")
 include("load_csv.jl")

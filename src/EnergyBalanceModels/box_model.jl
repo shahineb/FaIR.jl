@@ -10,7 +10,6 @@ struct BoxModel
     ση::Real                   # Stddev of the white noise in the radiative forcing
     σξ::Real                   # Stddev of the white noise in the temperature
     γ::Real                    # Autocorrelation parameter of stochastic forcing
-    seed::Int                  # Random seed for stochastic modelling
     Δt::Real                   # Time step yr
     Nₜ::Int                    # Number of time steps
 
@@ -21,18 +20,17 @@ struct BoxModel
                       ση::Real,
                       σξ::Real,
                       γ::Real,
-                      seed::Int,
                       Δt::Real,
                       Nₜ::Int)
         Nbox = length(C)
-        new(Nbox, C ./ Δt, κ, ε, F₄ₓ, ση, σξ, γ, seed, Δt, Nₜ)
+        new(Nbox, C ./ Δt, κ, ε, F₄ₓ, ση, σξ, γ, Δt, Nₜ)
     end
 end
 
 
-function BoxModel(path::String, seed::Int, Δt::Real, Nₜ::Int)
+function BoxModel(path::String, Δt::Real, Nₜ::Int)
     params = load_box_model_params(path)
-    return BoxModel(params.C, params.κ, params.ε, params.F₄ₓ, params.ση, params.σξ, params.γ, seed, Δt, Nₜ)
+    return BoxModel(params.C, params.κ, params.ε, params.F₄ₓ, params.ση, params.σξ, params.γ, Δt, Nₜ)
 end
 
 
@@ -81,7 +79,7 @@ function compute_bd(ebm::BoxModel)
 end
 
 
-function samplevariability(ebm::BoxModel)
+function samplevariability(ebm::BoxModel, seed=SEED)
     A = computeA(ebm)
     Nₐ = size(A, 1)
     Q = zeros(Nₐ, Nₐ)
@@ -91,7 +89,7 @@ function samplevariability(ebm::BoxModel)
     eᴴ = exp(H)
     Qd = eᴴ[Nₐ + 1:end, Nₐ + 1:end]' * eᴴ[1:Nₐ, Nₐ + 1:end]
     Qd = 0.5 .* (Qd .+ Qd')
-    Random.seed!(ebm.seed)
+    Random.seed!(seed)
     𝒩 = MvNormal(zeros(Nₐ), Qd)
     wd = rand(𝒩, ebm.Nₜ)'
     return wd
@@ -119,7 +117,7 @@ function emergentparameters(ebm::BoxModel, ratio₂ₓ₄ₓ=0.5)
 end
 
 
-function ebm_dynamics(ebm::BoxModel, internal_variability)
+function ebm_dynamics(ebm::BoxModel, internal_variability=true, seed=SEED)
     # Compute exp(A)
     A = computeA(ebm)
     eᴬ = exp(A)
@@ -131,7 +129,7 @@ function ebm_dynamics(ebm::BoxModel, internal_variability)
 
     # Sample internal variability updates
     if internal_variability
-        wd = samplevariability(ebm)
+        wd = samplevariability(ebm, seed)
     else
         wd = zeros(ebm.Nₜ, ebm.Nbox + 1)
     end
@@ -145,18 +143,9 @@ function FtoT(Tₜ₋₁, eᴬ, bd, wdₜ₋₁, RFₜ₋₁)
 end
 
 
-function run(ebm::BoxModel, RF::AbstractVector{<:Real})
-    # Compute exp(A)
-    A = computeA(ebm)
-    eᴬ = exp(A)
-
-    # Compute vector forcing update bd = A⁻¹(eᴬ - I)b
-    b = zeros(ebm.Nbox + 1)
-    b[1] = ebm.γ
-    bd = A \ ((eᴬ - I) * b)
-
-    # Sample internal variability updates
-    wd = samplevariability(ebm)
+function run(ebm::BoxModel, RF::AbstractVector{<:Real}, internal_variability, seed=SEED)
+    # Compute exp(A), bd = A⁻¹(eᴬ - I)b and sample from internal variability
+    eᴬ, bd, wd = ebm_dynamics(ebm, internal_variability, seed)
 
     # Compute boxes temperatures
     T = zeros(ebm.Nₜ, ebm.Nbox + 1)

@@ -84,10 +84,9 @@ aci_forcing = ACIForcing(species_csv, species_aci, active_dims_aci)
 # and the sampled internal variability trajectory wd TODO : find a way to make wd optional
 
 use_internal_variability = false        # whether or not sample from internal variability
-seed = 2                                # seed set to sample internal variability
 Δt = 1.                                 # yearly time step
 Nₜ = length(E.year)                      # number of years 
-ebm = BoxModel(ebm_csv, seed, Δt, Nₜ)
+ebm = BoxModel(ebm_csv, Δt, Nₜ)
 eᴬ, bd, wd = ebm_dynamics(ebm, use_internal_variability)
 
 
