@@ -1,5 +1,4 @@
-
-struct ReservoirModel
+struct ReservoirModel <: AbstractGasCycleModel
     species::Vector{String}
     a::AbstractMatrix{<:Real}
     τ::AbstractMatrix{<:Real}
@@ -14,6 +13,8 @@ struct ReservoirModel
     molecular_weight::AbstractVector{<:Real}
     χ_sensitivity_τᶜᴴ⁴::AbstractVector{<:Real}
     T_sensitivity_τᶜᴴ⁴::AbstractVector{<:Real}
+    idx_E::AbstractVector{<:Real}
+    idx_C::AbstractVector{<:Real}
 end
 
 
@@ -27,10 +28,12 @@ function ReservoirModel(species::Vector{String},
                         C₀::AbstractVector{<:Real},
                         molecular_weight::AbstractVector{<:Real},
                         χ_sensitivity_τᶜᴴ⁴::AbstractVector{<:Real},
-                        T_sensitivity_τᶜᴴ⁴::AbstractVector{<:Real})
+                        T_sensitivity_τᶜᴴ⁴::AbstractVector{<:Real},
+                        idx_E::AbstractVector{<:Real},
+                        idx_C::AbstractVector{<:Real})
     g₀, g₁ = compute_g(a, τ)
     CperE = compute_CperE(molecular_weight)
-    return ReservoirModel(species, a, τ, r0, ru, rT, ra, C₀, CperE, g₀, g₁, molecular_weight, χ_sensitivity_τᶜᴴ⁴, T_sensitivity_τᶜᴴ⁴)
+    return ReservoirModel(species, a, τ, r0, ru, rT, ra, C₀, CperE, g₀, g₁, molecular_weight, χ_sensitivity_τᶜᴴ⁴, T_sensitivity_τᶜᴴ⁴, idx_E, idx_C)
 end
 
 
@@ -46,8 +49,11 @@ function ReservoirModel(path::String, species::Vector{String})
                           params.C₀,
                           params.molecular_weight,
                           params.χ_sensitivity_τᶜᴴ⁴,
-                          params.T_sensitivity_τᶜᴴ⁴)
+                          params.T_sensitivity_τᶜᴴ⁴,
+                          params.idx_E,
+                          params.idx_C)
 end
+
 
 
 function compute_g(a, τ)

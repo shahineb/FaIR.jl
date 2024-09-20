@@ -11,9 +11,9 @@ using GLMakie
 # At the moment this code support emissions as an input type. The input data 
 # for FaIR is yearly global emission data for different species.
 
-emission_csv = "src/defaults/ssp245-emissions.csv"           # Input emission data
-species_csv = "src/defaults/species_configs_properties.csv"  # Species configs
-ebm_csv = "src/defaults/4xCO2_cummins_ebm3.csv"              # EBM params
+emission_csv = "src/defaults/ssp245-emissions.csv"             # Input emission data
+species_csv = "src/defaults/species_configs_properties.csv"    # Species configs
+ebm_csv = "src/defaults/MPI-ESM1-2-LR_4xCO2_cummins_ebm3.csv"  # EBM params
 
 
 
@@ -130,6 +130,7 @@ active_dims_ghg = [E.index.CO2, E.index.CH4, E.index.N2O] # TODO : not needing t
 for t in 2:Nₜ
     # Compute feedback gas lifetime scaling factor
     αₜ = α(gas_model, airborneₜ, E.cumulative[:, t - 1], T[t - 1, 2])
+    αₜ[E.index.CH4] = αᶜᴴ⁴(gas_model, E.values[:, t - 1], C[:, t - 1], E₀, gas_model.C₀, T[t - 1, 2])
 
     # Compute concentrations and reservoirs partition
     C[:, t], pool_partition = EtoC(gas_model, E.values[:, t - 1], pool_partition, αₜ, E₀, Δt)
@@ -185,7 +186,7 @@ for i in 1:n_species
 end
 ax = Axis(fig[1, n_species + 1]; xlabel = "Year", ylabel = "Wm⁻²", title = "Total")
 lines!(ax, E.year, vec(sum(F, dims=1)), label="Total")
-axislegend(ax, position=:rb)
+axislegend(ax, position=:lt)
 display(fig)
 
 

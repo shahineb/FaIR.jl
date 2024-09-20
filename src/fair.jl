@@ -2,7 +2,7 @@ module FaIR
 
 export Emissions
 
-export ReservoirModel, EtoC, α
+export ReservoirModel, EtoC, α, αᶜᴴ⁴
 
 export Meinshausen2020,
        Leach21,

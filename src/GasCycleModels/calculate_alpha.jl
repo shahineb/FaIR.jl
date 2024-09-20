@@ -6,10 +6,14 @@ function α(gcm::ReservoirModel, airborneₜ, cumulativeₜ, Tₜ, iirfmax=100.)
     return αₜ
 end
 
-function αᶜᴴ⁴(gcm::ReservoirModel, Eₜᶜᴴ⁴, Cₜᶜᴴ⁴, Tₜ, E₀ᶜᴴ⁴, C₀ᶜᴴ⁴)
-    logα = log(1 + (Eₜᶜᴴ⁴ - E₀ᶜᴴ⁴) * gcm.χ_sensitivity_τᶜᴴ⁴) +
-           log(1 + (Cₜᶜᴴ⁴ - C₀ᶜᴴ⁴) * gcm.χ_sensitivity_τᶜᴴ⁴) +
-           log(1 + Tₜ *  gcm.T_sensitivity_τᶜᴴ⁴)
+function αᶜᴴ⁴(gcm::ReservoirModel, Eₜ, Cₜ, E₀, C₀, Tₜ)
+    ΔE = (Eₜ .- E₀) .* gcm.idx_E
+    ΔC = (Cₜ .- C₀) .* gcm.idx_C
+    ΔE = ifelse.(isnan.(ΔE), 0., ΔE)
+    ΔC = ifelse.(isnan.(ΔC), 0., ΔC)
+    logα = sum(log.(1 .+ ΔE .* gcm.χ_sensitivity_τᶜᴴ⁴)) +
+           sum(log.(1 .+ ΔC .* gcm.χ_sensitivity_τᶜᴴ⁴)) +
+           sum(log.(1 .+ Tₜ .*  gcm.T_sensitivity_τᶜᴴ⁴))
     return exp(logα)
 end
 

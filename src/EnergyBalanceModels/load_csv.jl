@@ -1,8 +1,7 @@
 using CSV, DataFrames
 
 function load_box_model_params(path)
-    df = CSV.read(path, DataFrame)
-    row = filter(row -> row.model == "CAMS-CSM1-0", df)
+    row = CSV.read(path, DataFrame)
     γ = row.gamma[1]
     C = vcat(row.C1, row.C2, row.C3)
     κ = vcat(row.kappa1, row.kappa2, row.kappa3)

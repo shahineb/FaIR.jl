@@ -16,6 +16,9 @@ function load_gascycle_params(path, species)
     molecular_weight = row.molecular_weight
     χ_sensitivity_τᶜᴴ⁴ = row.ch4_lifetime_chemical_sensitivity
     T_sensitivity_τᶜᴴ⁴ = row.lifetime_temperature_sensitivity
+    T_sensitivity_τᶜᴴ⁴ = ifelse.(isnan.(T_sensitivity_τᶜᴴ⁴), 0., T_sensitivity_τᶜᴴ⁴)
+    idx_E = row.aerosol_chemistry_from_emissions
+    idx_C = row.aerosol_chemistry_from_concentration
     output = (a=a,
               τ=τ,
               r0=r0,
@@ -27,6 +30,8 @@ function load_gascycle_params(path, species)
               C₀=C₀,
               molecular_weight=molecular_weight,
               χ_sensitivity_τᶜᴴ⁴=χ_sensitivity_τᶜᴴ⁴,
-              T_sensitivity_τᶜᴴ⁴=T_sensitivity_τᶜᴴ⁴)
+              T_sensitivity_τᶜᴴ⁴=T_sensitivity_τᶜᴴ⁴,
+              idx_E=idx_E,
+              idx_C=idx_C)
     return output
 end
